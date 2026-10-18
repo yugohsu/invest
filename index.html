@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>投資經理人</title>
+<meta name="description" content="Beta 再平衡系統：正二＋現金，即時報價與走勢研判">
+<meta name="theme-color" content="#121827">
+<!-- 加到手機桌面時的名稱與圖示 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="投資經理人">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+  :root { --bg: #121827; --ink: #eef1f8; --muted: #8e98b3; --teal: #5fd4c0; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); overflow: hidden;
+    font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; }
+  /* 留出 iPhone 瀏海與底部橫條的安全區 */
+  .frame { position: fixed; top: env(safe-area-inset-top); left: 0; right: 0; bottom: 0; }
+  iframe { width: 100%; height: 100%; border: 0; display: block; background: var(--bg); }
+  .boot { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; background: var(--bg); transition: opacity .4s; z-index: 2; text-align: center; padding: 24px; }
+  .boot img { width: 84px; height: 84px; border-radius: 20px; }
+  .boot .t { font-size: 20px; font-weight: 800; }
+  .boot .s { color: var(--muted); font-size: 14px; }
+  .spin { width: 28px; height: 28px; border: 3px solid #2e3956; border-top-color: var(--teal); border-radius: 50%;
+    animation: s 1s linear infinite; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  .boot a { color: var(--teal); }
+  .hide { opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+  <div class="boot" id="boot">
+    <img src="icon-192.png" alt="">
+    <div class="t">投資經理人</div>
+    <div class="spin"></div>
+    <div class="s" id="msg">正在連線 Google…</div>
+  </div>
+  <div class="frame">
+    <iframe id="app" title="投資經理人" allow="clipboard-write"></iframe>
+  </div>
+
+<script>
+  /* ▼▼▼ 只要改這一行：換成你 Apps Script「網頁應用程式」的網址（結尾 /exec）▼▼▼ */
+  var APP_URL = 'https://script.google.com/macros/s/AKfycbwljCbuxKjPTzFqzBPFEMw6BY-o_IlpzyYyYTGeimw3qgI9gNHn6SMMhDjPRd5UVIcnUg/exec';
+  /* ▲▲▲▲▲▲ */
+
+  var frame = document.getElementById('app');
+  var boot = document.getElementById('boot');
+  var done = false;
+  frame.addEventListener('load', function () {
+    done = true;
+    boot.classList.add('hide');
+  });
+  frame.src = APP_URL;
+  // 15 秒還沒載入：提供直接開啟的連結（例如 Google 要求重新登入時）
+  setTimeout(function () {
+    if (done) return;
+    document.getElementById('msg').innerHTML =
+      '載入比較久…<br>如果一直沒出現，請 <a href="' + APP_URL + '" target="_blank" rel="noopener">直接打開投資經理人</a>';
+  }, 15000);
+</script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "投資經理人",
+  "short_name": "投資經理人",
+  "description": "Beta 再平衡系統：正二＋現金，即時報價與走勢研判",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#121827",
+  "theme_color": "#121827",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

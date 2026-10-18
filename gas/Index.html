@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#121827">
+<title>投資經理人</title>
+<style>
+  :root{
+    --bg:#121827; --panel:#1a2236; --card:#1f2840; --line:#2e3956;
+    --ink:#eef1f8; --muted:#8e98b3; --dim:#5f6a86;
+    --lev:#f0913a; --lev-bg:#2d2620; --lev-line:#7a5530;
+    --cash:#3b82f6; --cash-bg:#1b2747; --cash-line:#2f5aa8;
+    --ori:#a78bfa; --ori-bg:#262347; --ori-line:#5b4d9e;
+    --teal:#5fd4c0; --red:#ff6b5e; --green:#43c47b; --radius:18px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;font-size:16px;line-height:1.5}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+  header{position:sticky;top:0;z-index:6;background:var(--bg);padding:12px 0 10px}
+  .hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  h1{font-size:21px;margin:0;font-weight:800}
+  .sub{color:var(--muted);font-size:13px}
+  .iconbtn{flex:none;width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--teal);font-size:20px;cursor:pointer}
+  .mkt{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+  .mkt .px{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums}
+  .live{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--muted)}
+  .live i{width:8px;height:8px;border-radius:50%;background:var(--dim)}
+  .live.on i{background:var(--green);animation:pulse 2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(67,196,123,.6)}70%{box-shadow:0 0 0 7px rgba(67,196,123,0)}100%{box-shadow:0 0 0 0 rgba(67,196,123,0)}}
+  .seg{display:flex;background:var(--panel);border-radius:99px;padding:4px;margin-top:10px}
+  .seg button{flex:1;border:0;border-radius:99px;background:transparent;color:var(--muted);padding:8px 0;font-size:15px;font-family:inherit;cursor:pointer}
+  .seg button.on{background:#4a5470;color:var(--ink);font-weight:700}
+
+  .beta{background:var(--panel);border-radius:var(--radius);padding:14px 16px;margin-top:12px}
+  .bgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px}
+  .big{font-size:34px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1}
+  .mid{font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+  .chip{display:inline-block;padding:3px 10px;border-radius:99px;font-size:13px;font-weight:700;margin-top:8px}
+  .chip.ok{background:rgba(67,196,123,.15);color:var(--green)}
+  .chip.go{background:rgba(255,107,94,.15);color:var(--red)}
+  .meter{position:relative;height:10px;border-radius:99px;background:var(--line);margin:14px 2px 4px}
+  .meter .z{position:absolute;top:0;bottom:0;background:rgba(95,212,192,.25);border:1.5px solid var(--teal);border-radius:99px}
+  .meter .p{position:absolute;top:-5px;width:4px;height:20px;border-radius:2px;background:var(--ink);transform:translateX(-50%);transition:left .4s}
+  .mticks{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+  .gcard{border-radius:var(--radius);padding:12px 14px;border:1.5px solid}
+  .gcard.lev{background:var(--lev-bg);border-color:var(--lev-line)}
+  .gcard.cash{background:var(--cash-bg);border-color:var(--cash-line)}
+  .gcard.ori{background:var(--ori-bg);border-color:var(--ori-line);grid-column:1 / -1}
+  .gtop{display:flex;justify-content:space-between;align-items:center;font-weight:700}
+  .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+  .pct{font-weight:800;font-size:18px}
+  .kv{font-size:13px;color:var(--muted);margin-top:3px}
+  .kv b{color:var(--ink);font-size:17px;font-variant-numeric:tabular-nums;margin-left:4px}
+  .need{margin-top:6px;font-size:13px;font-weight:700}
+  .need .amt{display:block;font-size:21px;font-variant-numeric:tabular-nums}
+  .need.up{color:var(--red)} .need.down{color:var(--green)} .need.zero{color:var(--muted)}
+  .gfoot{display:flex;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:6px}
+  .act{margin-top:8px;width:100%;border:0;border-radius:12px;padding:9px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;background:rgba(255,255,255,.08);color:var(--ink)}
+
+  .sec{display:flex;justify-content:space-between;align-items:flex-end;margin:20px 2px 8px}
+  .sec .t{font-size:17px;font-weight:700}
+  .slabels{display:flex;justify-content:space-between;font-weight:800;font-size:18px;margin:0 4px 4px}
+  .track{position:relative;height:48px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer}
+  .bar{position:absolute;left:0;right:0;top:14px;height:20px;border-radius:99px;overflow:hidden;display:flex;pointer-events:none}
+  .bar .l{background:var(--lev)} .bar .c{flex:1;background:var(--cash)}
+  .knob{position:absolute;top:2px;width:44px;height:44px;margin-left:-22px;border-radius:50%;background:#1f2840;border:3px solid var(--teal);box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:var(--teal);font-weight:800;pointer-events:none}
+  .track.drag .knob{transform:scale(1.12)}
+  .hint{color:var(--muted);font-size:13px;margin-top:6px}
+  .row{display:flex;gap:8px;margin-top:10px}
+  .btn{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:10px;font-size:15px;font-family:inherit;cursor:pointer}
+  .btn.p{background:var(--teal);border-color:var(--teal);color:#0f1a1f;font-weight:800}
+  .btn:disabled{opacity:.45}
+
+  .panel{background:var(--panel);border-radius:var(--radius);padding:14px 16px;margin-top:10px}
+  .injrow{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}
+  .track.thin{height:40px}
+  .track.thin .bar{top:16px;height:8px;background:var(--line)}
+  .track.thin .bar .l{background:var(--teal)}
+  .track.thin .knob{top:6px;width:28px;height:28px;margin-left:-14px;background:#fff;border:0}
+  .injout{margin-top:8px;font-size:15px}
+  .injout b{font-variant-numeric:tabular-nums}
+
+  .group{border-radius:var(--radius);border:1.5px solid;padding:14px;margin-top:12px}
+  .group.lev{border-color:var(--lev-line)} .group.cash{border-color:var(--cash-line)} .group.ori{border-color:var(--ori-line)}
+  .group h3{margin:0 0 10px;font-size:19px;display:flex;align-items:center}
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pill{border-radius:99px;padding:7px 14px;border:1.5px solid;cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);background:transparent}
+  .group.lev .pill{border-color:var(--lev-line);background:var(--lev-bg)}
+  .group.cash .pill{border-color:var(--cash-line);background:var(--cash-bg)}
+  .group.ori .pill{border-color:var(--ori-line);background:var(--ori-bg)}
+  .pill .nm{font-weight:700;font-size:15px}
+  .pill .vl{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .pill .ch{font-size:12px;margin-left:4px}
+  .add{margin-top:10px;border:0;border-radius:99px;padding:8px 16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+  .group.lev .add{background:var(--lev-bg);color:var(--lev)}
+  .group.ori .add{background:var(--ori-bg);color:var(--ori)}
+  .up{color:var(--red)} .down{color:var(--green)}
+  .flash{animation:fl 1s}
+  @keyframes fl{0%{background:rgba(95,212,192,.25)}100%{background:transparent}}
+
+  .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:8;background:#0e1422;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+  .tabbar button{flex:1;border:0;background:transparent;color:var(--dim);padding:10px 0 12px;font-size:12px;font-family:inherit;cursor:pointer}
+  .tabbar button .i{display:block;font-size:22px;line-height:1.2}
+  .tabbar button.on{color:var(--teal);font-weight:700}
+
+  pre{white-space:pre-wrap;word-break:break-word;font-family:inherit;font-size:15px;margin:0}
+  label{display:block;font-weight:700;margin-top:14px}
+  .help{display:block;font-weight:400;color:var(--muted);font-size:13px}
+  input.f{width:100%;font-size:16px;padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-family:inherit;margin-top:5px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:700}
+  .chk input{transform:scale(1.25)}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center;z-index:20}
+  .sheet{background:var(--panel);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:20px 16px calc(24px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+  .sheet h3{margin:0 0 4px;font-size:19px}
+  .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:99px;display:none;z-index:30;max-width:90%;font-weight:700}
+  .loading{text-align:center;color:var(--muted);padding:60px 0}
+  .spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--teal);border-radius:50%;animation:s 1s linear infinite;margin:0 auto 12px}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .warn{background:rgba(255,107,94,.12);color:#ffb1a9;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:14px}
+  .muted{color:var(--muted)}
+  .ol{background:linear-gradient(135deg,#1d2a44,#1a2236);border:1.5px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-top:12px}
+  .ol .hd{display:flex;justify-content:space-between;align-items:center}
+  .ol .lab{font-size:19px;font-weight:800}
+  .ol .est{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums}
+  .ol .us{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+  .ol .us div{background:rgba(255,255,255,.04);border-radius:10px;padding:6px 8px;font-size:12px;color:var(--muted)}
+  .ol .us b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+  .ol ul{margin:8px 0 0;padding-left:18px} .ol li{margin:3px 0;font-size:14px}
+  .ol .tips{background:rgba(95,212,192,.08);border-radius:12px;padding:10px 12px;margin-top:10px}
+  .ol .tips b{color:var(--teal)}
+  .lv{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .lv span{font-size:12px;border:1px solid var(--line);border-radius:99px;padding:2px 9px;color:var(--muted)}
+  .news a{color:var(--ink);text-decoration:none;font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="hrow">
+      <div>
+        <div class="mkt"><h1>資產再平衡</h1><span class="live" id="live"><i></i><span id="liveTxt">連線中</span></span></div>
+        <div class="mkt"><span class="sub">加權指數</span><span class="px" id="idxPx">—</span><span id="idxChg" class="sub"></span></div>
+      </div>
+      <button class="iconbtn" id="refresh" onclick="load()" aria-label="重新整理">⟳</button>
+    </div>
+    <div class="seg" id="mode">
+      <button class="on" data-m="value">現值再平衡</button>
+      <button data-m="cost">成本檢視</button>
+    </div>
+  </header>
+
+  <section id="login" class="panel" style="display:none;margin-top:30px">
+    <h3 style="margin-top:0">請輸入網頁密碼</h3>
+    <input class="f" id="pin" type="password" inputmode="numeric" placeholder="程式裡 WEB_PIN 的密碼">
+    <div class="row"><button class="btn p" onclick="doLogin()">進入</button></div>
+  </section>
+
+  <section id="pg-main" class="page"></section>
+  <section id="pg-report" class="page" style="display:none"></section>
+  <section id="pg-set" class="page" style="display:none"></section>
+</div>
+
+<nav class="tabbar" id="tabbar">
+  <button class="on" data-p="main"><span class="i">⚖️</span>再平衡</button>
+  <button data-p="report"><span class="i">📄</span>報告</button>
+  <button data-p="set"><span class="i">⚙️</span>設定</button>
+</nav>
+<div class="modal" id="modal" onclick="if(event.target===this)closeModal()"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var PIN = '', D = null, MODE = 'value', PREVIEW = null, INJ = 0, DRAGGING = false, LIVE_T = null, LIVE_BUSY = false;
+var LIVE_MS = 60000;
+try { PIN = localStorage.getItem('tm_pin') || ''; } catch (e) {}
+function $(i){ return document.getElementById(i); }
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function comma(n, d){ if (!isFinite(n)) return '—'; d = d || 0; var p = Math.abs(n).toFixed(d).split('.'); p[0] = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, ','); return (n < 0 ? '-' : '') + p.join('.'); }
+function pct(x, d){ return isFinite(x) ? (x * 100).toFixed(d == null ? 0 : d) + '%' : '—'; }
+function wan(v){ return !isFinite(v) ? '—' : Math.abs(v) >= 10000 ? (v / 10000).toFixed(1).replace(/\.0$/, '') + ' 萬' : comma(v); }
+function toast(m){ var t = $('toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(function(){ t.style.display = 'none'; }, 3000); }
+function call(fn, args, ok, fail){
+  var r = google.script.run.withSuccessHandler(ok).withFailureHandler(function(e){
+    var m = (e && e.message) || String(e);
+    if (/密碼/.test(m)) { try { localStorage.removeItem('tm_pin'); } catch (x) {} PIN = ''; showLogin(); }
+    if (fn !== 'apiLive') toast('⚠️ ' + m);
+    if (fail) fail(m);
+  });
+  r[fn].apply(r, [PIN].concat(args || []));
+}
+function showLogin(){ $('login').style.display = 'block'; document.querySelectorAll('.page').forEach(function(p){ p.style.display = 'none'; }); }
+function doLogin(){
+  PIN = $('pin').value.trim();
+  google.script.run.withSuccessHandler(function(){
+    try { localStorage.setItem('tm_pin', PIN); } catch (e) {}
+    $('login').style.display = 'none'; go('main'); load();
+  }).withFailureHandler(function(e){ toast('⚠️ ' + (e.message || e)); }).apiLogin(PIN);
+}
+document.querySelectorAll('#tabbar button').forEach(function(b){ b.onclick = function(){ go(b.dataset.p); }; });
+function go(p){
+  document.querySelectorAll('#tabbar button').forEach(function(x){ x.classList.toggle('on', x.dataset.p === p); });
+  document.querySelectorAll('.page').forEach(function(x){ x.style.display = 'none'; });
+  $('pg-' + p).style.display = 'block';
+  $('mode').style.display = p === 'main' ? 'flex' : 'none';
+}
+document.querySelectorAll('#mode button').forEach(function(b){
+  b.onclick = function(){
+    MODE = b.dataset.m;
+    document.querySelectorAll('#mode button').forEach(function(x){ x.classList.toggle('on', x === b); });
+    buildMain();
+  };
+});
+
+/* ===== 載入 ===== */
+function load(){
+  if (!PIN) { showLogin(); return; }
+  $('refresh').disabled = true;
+  $('pg-main').innerHTML = '<div class="loading"><div class="spin"></div>正在抓最新價格…</div>';
+  call('apiDashboard', [], function(d){
+    $('refresh').disabled = false; D = d; PREVIEW = null; INJ = 0;
+    if (d.market) setIndex(d.market.price, d.market.price / (1 + d.market.chg));
+    buildMain(); renderReport(); renderSet(); startLive();
+  }, function(){ $('refresh').disabled = false; $('pg-main').innerHTML = '<div class="panel">讀取失敗，請按右上角 ⟳ 再試。</div>'; });
+}
+
+/* ===== 每分鐘即時報價 ===== */
+function startLive(){
+  clearInterval(LIVE_T);
+  LIVE_T = setInterval(tickLive, LIVE_MS);
+  setLive('on', '即時');
+}
+function setLive(state, txt){ $('live').className = 'live' + (state === 'on' ? ' on' : ''); $('liveTxt').textContent = txt; }
+function setIndex(px, prev){
+  $('idxPx').textContent = comma(px, 2);
+  if (prev > 0) {
+    var ch = px - prev, r = ch / prev;
+    $('idxChg').innerHTML = '<span class="' + (ch >= 0 ? 'up' : 'down') + '" style="font-weight:700">' + (ch >= 0 ? '▲' : '▼') + comma(Math.abs(ch), 2) + '（' + (Math.abs(r) * 100).toFixed(2) + '%）</span>';
+  }
+}
+function tickLive(){
+  if (!D || LIVE_BUSY || document.hidden) return;
+  LIVE_BUSY = true;
+  call('apiLive', [], function(r){
+    LIVE_BUSY = false;
+    if (!r || !r.ok) { setLive('off', '報價暫停'); return; }
+    var open = r.index && r.index.date === r.today && (r.index.time || '') < '13:31';
+    setLive(open ? 'on' : 'off', (open ? '即時 ' : '休市 ') + r.serverTime.substr(0, 5));
+    if (r.index) setIndex(r.index.price, r.index.prev);
+    if (r.fx) D.fx = r.fx;
+    (D.items || []).forEach(function(x){
+      var q = r.quotes[x.code]; if (!q || !(q.price > 0)) return;
+      x.price = q.price; if (q.prev > 0) x.prev = q.prev;
+      var fx = x.us ? (D.fx || 0) : 1;
+      x.value = x.shares * x.price * fx;
+      x.pnl = x.cost > 0 ? (x.price - x.cost) * x.shares * fx : NaN;
+    });
+    if (r.quotes[D.tradeCode]) D.tradePrice = r.quotes[D.tradeCode].price;
+    if (!DRAGGING) { refresh(true); }
+  }, function(){ LIVE_BUSY = false; setLive('off', '報價暫停'); });
+}
+document.addEventListener('visibilitychange', function(){ if (!document.hidden && D) tickLive(); });
+
+/* ===== 核心計算 ===== */
+function groups(){
+  var lev = [], ori = [], useCost = MODE === 'cost';
+  (D.items || []).forEach(function(x){ (x.mult >= 2 ? lev : ori).push(x); });
+  function val(x){ return useCost && x.cost > 0 ? x.cost * x.shares * (x.us && D.fx ? D.fx : 1) : x.value; }
+  var L = 0, levExp = 0, O = 0, Eo = 0;
+  lev.forEach(function(x){ L += val(x); levExp += val(x) * x.mult; });
+  ori.forEach(function(x){ O += val(x); Eo += val(x) * x.mult; });
+  var C = Number(D.holdings.cash) || 0;
+  return { lev: lev, ori: ori, L: L, levExp: levExp, levMult: L > 0 ? levExp / L : 2, O: O, Eo: Eo, C: C, A: L + O + C, val: val };
+}
+function compute(){
+  var g = groups(), S = D.settings, band = Number(S.band) / 100, m = g.levMult;
+  var pool = g.L + g.C, expo = g.Eo + g.levExp;
+  var beta = g.A > 0 ? expo / g.A : NaN;
+  var Tsaved = Number(S.targetBeta), T = PREVIEW != null ? PREVIEW : Tsaved;
+  var X0 = Math.min(Math.max((T * g.A - g.Eo) / m, 0), pool);
+  var v = pool > 0 ? X0 / pool : 0;
+  var N = INJ, A2 = g.A + N, pool2 = pool + N, X = v * pool2, cashT = pool2 - X;
+  return {
+    g: g, beta: beta, expo: expo, T: T, Tsaved: Tsaved, v: v, X: X, cashT: cashT, N: N, A2: A2,
+    gapLev: X - g.L, dn: T * (1 - band), up: T * (1 + band),
+    triggered: beta > T * (1 + band) || beta < T * (1 - band),
+    firewall: (Number(S.annualExpense) || 0) * (D.firewallYears || 4),
+    Tnew: A2 > 0 ? (g.Eo + m * X) / A2 : NaN
+  };
+}
+
+/* ===== 畫面：骨架只建一次，數字用 refresh() 更新（拖曳不會中斷） ===== */
+function buildMain(){
+  if (!D) return;
+  var isCost = MODE === 'cost', h = '';
+  h += '<div id="topArea"></div><div id="olArea"></div>';
+  if (!isCost) {
+    h += '<div class="sec"><span class="t">拖曳調整目標比例</span><span class="sub">目標 Beta <b id="tB" style="color:var(--ink);font-size:18px"></b></span></div>' +
+         '<div class="slabels"><span id="lbL" style="color:var(--lev)"></span><span id="lbC" style="color:var(--cash)"></span></div>' +
+         '<div class="track" id="trk"><div class="bar"><div class="l" id="barL"></div><div class="c"></div></div><div class="knob" id="knob">↔</div></div>' +
+         '<div class="hint" id="slHint"></div>' +
+         '<div class="row"><button class="btn" onclick="presetT(0.6)">新手 0.6</button><button class="btn" onclick="presetT(1)">1.0</button><button class="btn" onclick="presetT(1.2)">標準 1.2</button></div>' +
+         '<div id="saveRow"></div>';
+    h += '<div class="panel"><div style="font-weight:700">⊕ 新資金注入</div>' +
+         '<div class="injrow" style="margin-top:6px"><span id="injLab">未注入</span><span id="injMax"></span></div>' +
+         '<div class="track thin" id="trk2"><div class="bar"><div class="l" id="injL"></div></div><div class="knob" id="knob2"></div></div>' +
+         '<input class="f" id="injIn" type="number" inputmode="numeric" placeholder="或直接輸入金額" onchange="INJ=Math.max(0,Number(this.value)||0);refresh()">' +
+         '<div id="injOut"></div></div>';
+  }
+  h += '<div id="groupsArea"></div>';
+  $('pg-main').innerHTML = h;
+  if (!isCost) renderOutlook();
+  if (!isCost) {
+    makeDrag($('trk'), function(f){ setTargetFromFrac(f); });
+    makeDrag($('trk2'), function(f){ var mx = injMax(); INJ = Math.round(f * mx / 10000) * 10000; refresh(); });
+  }
+  refresh();
+}
+
+// 自製拖曳：手指／滑鼠都能拖，也能點一下跳過去
+function makeDrag(el, onFrac){
+  function frac(e){
+    var r = el.getBoundingClientRect();
+    var x = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+    return Math.min(1, Math.max(0, x / r.width));
+  }
+  function start(e){ DRAGGING = true; el.classList.add('drag'); onFrac(frac(e)); e.preventDefault(); }
+  function move(e){ if (!DRAGGING || !el.classList.contains('drag')) return; onFrac(frac(e)); e.preventDefault(); }
+  function end(){ if (!el.classList.contains('drag')) return; el.classList.remove('drag'); DRAGGING = false; refresh(); }
+  el.addEventListener('pointerdown', function(e){ el.setPointerCapture && el.setPointerCapture(e.pointerId); start(e); });
+  el.addEventListener('pointermove', move);
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+}
+function setTargetFromFrac(f){
+  var g = groups(), pool = g.L + g.C;
+  f = Math.round(f * 100) / 100;
+  PREVIEW = g.A > 0 ? Math.round((g.Eo + g.levMult * f * pool) / g.A * 100) / 100 : 1.2;
+  refresh();
+}
+function injMax(){ var g = groups(); return Math.max(100000, Math.ceil(g.A * 0.5 / 10000) * 10000); }
+
+function refresh(flash){
+  if (!D) return;
+  var c = compute(), g = c.g, S = D.settings, isCost = MODE === 'cost';
+  var lot = Math.max(1, Number(S.lot) || 1), p = D.tradePrice;
+  var qty = p > 0 ? Math.floor(Math.abs(c.gapLev) / p / lot) * lot : 0;
+  var A = isCost ? g.A : c.A2;
+
+  /* Beta ＋ 曝險 */
+  var lo = 0, hi = Math.max(2, c.up * 1.3, (c.beta || 0) * 1.1);
+  function x(v){ return Math.min(100, Math.max(0, (v - lo) / (hi - lo) * 100)); }
+  var t = '<div class="beta' + (flash ? ' flash' : '') + '"><div class="bgrid">' +
+    '<div><div class="sub">目前 Beta</div><div class="big">' + (isFinite(c.beta) ? c.beta.toFixed(2) : '—') + '</div></div>' +
+    '<div><div class="sub">曝險</div><div class="big">' + pct(c.beta) + '</div></div>' +
+    '<div><div class="sub">曝險金額</div><div class="mid">' + wan(c.expo) + '</div></div>' +
+    '<div><div class="sub">總資產</div><div class="mid">' + wan(g.A) + '</div></div>' +
+    '</div>' +
+    '<div class="sub" style="margin-top:6px">大盤漲跌 1%，你的資產約 <b style="color:var(--ink)">±' + comma(c.expo * 0.01) + ' 元</b></div>' +
+    '<div class="meter"><div class="z" style="left:' + x(c.dn) + '%;width:' + (x(c.up) - x(c.dn)) + '%"></div><div class="p" style="left:' + x(c.beta) + '%"></div></div>' +
+    '<div class="mticks"><span>0</span><span>範圍 ' + c.dn.toFixed(2) + '～' + c.up.toFixed(2) + '（目標 ' + c.T.toFixed(2) + '）</span><span>' + hi.toFixed(1) + '</span></div>' +
+    (isCost ? '<span class="chip ok">成本檢視（只供參考）</span>' : c.triggered ? '<span class="chip go">已超出範圍：建議調整</span>' : '<span class="chip ok">在範圍內：可以不動</span>') +
+    '</div>';
+
+  /* 三張卡 */
+  function need(gap){
+    if (isCost) return '';
+    var cls = Math.abs(gap) < 1 ? 'zero' : gap > 0 ? 'up' : 'down';
+    var lab = Math.abs(gap) < 1 ? '已達目標' : gap > 0 ? '↗ 需加碼' : '↘ 需減碼';
+    return '<div class="need ' + cls + '">' + lab + '<span class="amt">' + comma(Math.abs(gap)) + '</span></div>';
+  }
+  t += '<div class="cards">';
+  t += '<div class="gcard lev"><div class="gtop"><span><span class="dot" style="background:var(--lev)"></span>正二</span><span class="pct" style="color:var(--lev)">' + pct(isCost ? g.L / A : c.X / A) + '</span></div>' +
+       (isCost ? '' : '<div class="kv">目標<b>' + comma(c.X) + '</b></div>') + '<div class="kv">現有<b>' + comma(g.L) + '</b></div>' +
+       need(c.gapLev) + (!isCost && qty > 0 ? '<div class="kv">≈ ' + D.tradeCode + ' ' + comma(qty) + ' 股</div>' : '') +
+       '<div class="gfoot"><span>曝險 ' + wan(g.levExp) + '</span><span>實際 ' + pct(g.L / g.A) + '</span></div>' +
+       (!isCost && qty > 0 ? '<button class="act" onclick="openTrade(\'' + (c.gapLev > 0 ? 'buy' : 'sell') + '\',\'' + D.tradeCode + '\',' + qty + ',' + p + ')">✅ 我已' + (c.gapLev > 0 ? '買進' : '賣出') + '</button>' : '') + '</div>';
+  t += '<div class="gcard cash"><div class="gtop"><span><span class="dot" style="background:var(--cash)"></span>現金</span><span class="pct" style="color:var(--cash)">' + pct(isCost ? g.C / A : c.cashT / A) + '</span></div>' +
+       (isCost ? '' : '<div class="kv">目標<b>' + comma(c.cashT) + '</b></div>') + '<div class="kv">現有<b>' + comma(g.C + (isCost ? 0 : c.N)) + '</b></div>' +
+       (isCost ? '' : need(c.cashT - g.C - c.N)) +
+       '<div class="gfoot"><span>防火牆 ' + (c.firewall > 0 ? wan(c.firewall) : '未設定') + '</span><span>實際 ' + pct(g.C / g.A) + '</span></div></div>';
+  if (g.ori.length) {
+    t += '<div class="gcard ori"><div class="gtop"><span><span class="dot" style="background:var(--ori)"></span>原型／個股（長抱，不參與買賣）</span><span class="pct" style="color:var(--ori)">' + pct(g.O / A) + '</span></div>' +
+         '<div class="kv">現有<b>' + comma(g.O) + '</b>　<span class="muted">曝險 ' + wan(g.Eo) + '｜# ' + g.ori.length + ' 檔</span></div></div>';
+  }
+  t += '</div>';
+  if (!isCost && c.cashT < c.firewall) t += '<div class="warn">⚠️ 這個目標會讓現金低於 ' + (D.firewallYears || 4) + ' 年生活費防火牆（' + comma(c.firewall) + '），建議調低。</div>';
+  if (!isCost && !c.triggered && Math.abs(c.gapLev) >= 1 && PREVIEW == null && !c.N) t += '<div class="hint">💡 Beta 在範圍內，系統規則是「不用動」。加減碼金額只是離完美比例的差距。</div>';
+  $('topArea').innerHTML = t;
+
+  /* 拖曳區 */
+  if (!isCost) {
+    var levPct = c.v * 100;
+    $('tB').textContent = c.T.toFixed(2);
+    $('lbL').textContent = '正二 ' + Math.round(levPct) + '%';
+    $('lbC').textContent = '現金 ' + (100 - Math.round(levPct)) + '%';
+    $('barL').style.width = levPct + '%';
+    $('knob').style.left = levPct + '%';
+    $('slHint').textContent = '比例是「正二 ÷（正二＋現金）」' + (g.ori.length ? '，原型／個股 ' + pct(g.O / A) + ' 固定不動' : '') + '。拖曳或點一下橫條就能改。';
+    $('saveRow').innerHTML = (PREVIEW != null && Math.abs(PREVIEW - c.Tsaved) > 0.004)
+      ? '<div class="row"><button class="btn" onclick="PREVIEW=null;refresh()">取消</button><button class="btn p" onclick="saveTarget(this)">💾 設為新目標（Beta ' + c.T.toFixed(2) + '）</button></div>' : '';
+    var mx = injMax();
+    $('injMax').textContent = '上限 ' + comma(mx);
+    $('injLab').textContent = c.N ? comma(c.N) + ' 元' : '未注入';
+    $('injL').style.width = Math.min(100, c.N / mx * 100) + '%';
+    $('knob2').style.left = Math.min(100, c.N / mx * 100) + '%';
+    if (!DRAGGING && document.activeElement !== $('injIn')) $('injIn').value = c.N || '';
+    if (c.N > 0) {
+      var buyLev = Math.max(0, Math.min(c.gapLev, c.N));
+      var q2 = p > 0 ? Math.floor(buyLev / p / lot) * lot : 0;
+      $('injOut').innerHTML = '<div class="injout">這筆錢建議：<br>・買 ' + D.tradeCode + ' <b>' + comma(q2) + ' 股</b>（約 ' + comma(q2 * p) + ' 元）<br>・其餘 <b>' + comma(c.N - q2 * p) + ' 元</b>放現金<br><span class="muted">注入後 Beta 約 ' + c.Tnew.toFixed(2) + '</span></div>' +
+        '<div class="row"><button class="btn p" onclick="commitInject(' + c.N + ')">💰 已存入，加到現金</button></div>';
+    } else $('injOut').innerHTML = '';
+  }
+
+  /* 群組（拖曳中不重畫，省電） */
+  if (!DRAGGING) {
+    var gh = '';
+    gh += '<div class="group lev"><h3><span class="dot" style="background:var(--lev)"></span>正二</h3><div class="pills">' + g.lev.map(pill).join('') + (g.lev.length ? '' : '<span class="muted">還沒有正二</span>') + '</div><button class="add" onclick="openAdd(\'' + D.tradeCode + '\')">＋ 加入持股</button></div>';
+    gh += '<div class="group cash"><h3><span class="dot" style="background:var(--cash)"></span>現金</h3><div class="pills"><button class="pill" onclick="openCash()"><div class="nm">💵 現金</div><div class="vl">' + comma(g.C) + '</div></button></div></div>';
+    gh += '<div class="group ori"><h3><span class="dot" style="background:var(--ori)"></span>原型／個股</h3><div class="pills">' + g.ori.map(pill).join('') + (g.ori.length ? '' : '<span class="muted">沒有</span>') + '</div><button class="add" onclick="openAdd(\'\')">＋ 加入持股</button></div>';
+    (D.missing || []).forEach(function(cd){ gh += '<div class="warn">' + esc(cd) + '：暫時取不到價格，沒算進去。</div>'; });
+    gh += '<div class="hint" style="margin:14px 2px">點持股可以買進、賣出、修改、刪除。價格每 1 分鐘自動更新（盤中）。</div>';
+    $('groupsArea').innerHTML = gh;
+  }
+}
+function sg(x){ return isFinite(x) && x !== null ? (x >= 0 ? '+' : '') + (x * 100).toFixed(2) + '%' : '—'; }
+function usBox(n, q){ return '<div>' + n + '<b class="' + (q && q.chg >= 0 ? 'up' : 'down') + '">' + (q ? sg(q.chg) : '—') + '</b></div>'; }
+function renderOutlook(){
+  var o = D.outlook, el = $('olArea'); if (!el) return;
+  if (!o) { el.innerHTML = ''; return; }
+  var h = '<div class="ol"><div class="hd"><div><div class="sub">走勢研判（美股＋消息面）</div><div class="lab">' + o.icon + ' ' + esc(o.label) + '</div></div>' +
+    (isFinite(o.est) && o.est !== null ? '<div style="text-align:right"><div class="sub">推估開盤</div><div class="est ' + (o.est >= 0 ? 'up' : 'down') + '">' + sg(o.est) + '</div><div class="sub">' + comma(o.loIdx) + '～' + comma(o.hiIdx) + '</div></div>' : '') + '</div>';
+  h += '<div class="us">' + usBox('台積電ADR', o.us.tsm) + usBox('費半', o.us.sox) + usBox('那斯達克', o.us.ndx) + usBox('標普500', o.us.spx) + usBox('輝達', o.us.nvda) +
+       '<div>VIX<b>' + (o.us.vix ? o.us.vix.price.toFixed(1) : '—') + '</b></div></div>';
+  if (o.usDate) h += '<div class="sub" style="margin-top:4px">美股資料日期 ' + esc(o.usDate) + '（美東）</div>';
+  if (o.minus.length) h += '<ul>' + o.minus.map(function(t){ return '<li><span class="down">🔻</span> ' + esc(t) + '</li>'; }).join('') + '</ul>';
+  if (o.plus.length) h += '<ul>' + o.plus.map(function(t){ return '<li><span class="up">🔺</span> ' + esc(t) + '</li>'; }).join('') + '</ul>';
+  if (o.levels && o.levels.length) h += '<div class="lv">' + o.levels.map(function(x){ return '<span>' + x.name + ' ' + comma(x.v) + '</span>'; }).join('') + '</div>';
+  h += '<div class="tips"><b>💡 投資參考建議</b><ul>' + o.tips.map(function(t){ return '<li>' + esc(t) + '</li>'; }).join('') + '</ul></div>';
+  if (o.news && o.news.length) {
+    h += '<details style="margin-top:10px"><summary class="sub">📰 最新消息（' + o.news.length + ' 則）</summary><div class="news">' +
+      o.news.map(function(n){ return '<div style="margin-top:6px">' + (n.tone > 0 ? '🔺' : n.tone < 0 ? '🔻' : '▫️') + ' <a href="' + esc(n.link) + '" target="_blank" rel="noopener">' + esc(n.title) + '</a></div>'; }).join('') + '</div></details>';
+  }
+  h += '<div class="hint">走勢研判是機率推估，常會不準；真正的買賣以 Beta 系統為準。約 20 分鐘更新一次。</div></div>';
+  el.innerHTML = h;
+}
+function pill(x){
+  var chg = x.prev > 0 ? x.price / x.prev - 1 : NaN;
+  var v = MODE === 'cost' && x.cost > 0 ? x.cost * x.shares * (x.us && D.fx ? D.fx : 1) : x.value;
+  return '<button class="pill" onclick="openItem(\'' + x.code + '\')"><div class="nm">' + esc(x.name || x.code) + ' <span class="muted" style="font-weight:400">' + esc(x.code) + '</span></div>' +
+    '<div class="vl">' + comma(x.price, 2) + '｜' + comma(v) + (isFinite(chg) && MODE === 'value' ? '<span class="ch ' + (chg >= 0 ? 'up' : 'down') + '">' + (chg >= 0 ? '▲' : '▼') + (Math.abs(chg) * 100).toFixed(2) + '%</span>' : '') + '</div></button>';
+}
+function presetT(t){ PREVIEW = t; refresh(); }
+function saveTarget(btn){
+  btn.disabled = true;
+  var t = PREVIEW;
+  call('apiSaveSettings', [{ targetBeta: t }], function(){ D.settings.targetBeta = t; PREVIEW = null; toast('已設定目標 Beta ' + t.toFixed(2)); refresh(); renderSet(); }, function(){ btn.disabled = false; });
+}
+function commitInject(n){ call('apiSetCash', [(Number(D.holdings.cash) || 0) + n], function(){ toast('已加入現金 ' + comma(n) + ' 元'); load(); }); }
+
+/* ===== 彈窗 ===== */
+function openModal(h){ $('sheet').innerHTML = h; $('modal').style.display = 'flex'; }
+function closeModal(){ $('modal').style.display = 'none'; }
+function isUS(c){ return /^[A-Z]{1,5}$/.test(c); }
+function findItem(code){ return (D.items || []).filter(function(x){ return x.code === code; })[0]; }
+function openItem(code){
+  var x = findItem(code); if (!x) return;
+  var u = x.us ? ' 美元' : ' 元';
+  openModal('<h3>' + esc(x.name) + ' ' + esc(code) + '</h3>' +
+    '<div class="muted">' + comma(x.shares) + ' 股｜現價 ' + comma(x.price, 2) + u + '｜成本 ' + (x.cost ? comma(x.cost, 2) + u : '—') + '｜曝險 ' + x.mult + ' 倍</div>' +
+    '<div style="font-size:24px;font-weight:800;margin:8px 0">' + comma(x.value) + ' 元' + (isFinite(x.pnl) ? ' <span class="' + (x.pnl >= 0 ? 'up' : 'down') + '" style="font-size:16px">' + (x.pnl >= 0 ? '+' : '') + comma(x.pnl) + '</span>' : '') + '</div>' +
+    '<div class="row"><button class="btn" style="color:var(--red)" onclick="openTrade(\'buy\',\'' + code + '\',\'\',' + x.price + ')">買進</button>' +
+    '<button class="btn" style="color:var(--green)" onclick="openTrade(\'sell\',\'' + code + '\',\'\',' + x.price + ')">賣出</button></div>' +
+    '<div class="row"><button class="btn" onclick="openEdit(\'' + code + '\')">修改股數／成本</button><button class="btn" style="color:var(--red)" onclick="delHold(\'' + code + '\')">刪除</button></div>' +
+    '<div class="row"><button class="btn" onclick="closeModal()">關閉</button></div>');
+}
+function openTrade(side, code, qty, price){
+  openModal('<h3>' + (side === 'buy' ? '記錄買進 ' : '記錄賣出 ') + esc(code) + '</h3>' +
+    '<label>股數<span class="help">1 張＝1000 股</span><input class="f" id="tq" type="number" inputmode="numeric" value="' + (qty || '') + '"></label>' +
+    '<label>成交價' + (isUS(code) ? '（美元）' : '（元）') + '<input class="f" id="tp" type="number" step="0.01" inputmode="decimal" value="' + (price || '') + '"></label>' +
+    '<div class="chk"><input id="tc" type="checkbox" checked>同時' + (side === 'buy' ? '從現金扣除' : '把錢加回現金') + '（含手續費、稅）</div>' +
+    '<div class="row"><button class="btn" onclick="closeModal()">取消</button><button class="btn p" onclick="submitTrade(\'' + side + '\',\'' + code + '\',this)">確認</button></div>');
+}
+function submitTrade(side, code, btn){
+  var q = Number($('tq').value), p = Number($('tp').value);
+  if (!(q > 0) || !(p > 0)) { toast('請輸入股數和價格'); return; }
+  btn.disabled = true;
+  call('apiTrade', [side, code, q, p, $('tc').checked], function(r){ closeModal(); toast(r.msg); load(); }, function(){ btn.disabled = false; });
+}
+function openAdd(def){
+  openModal('<h3>＋ 加入持股</h3>' +
+    '<label>代號<span class="help">台股：0050、00685L、2330… 美股：QLD、QQQ…</span><input class="f" id="ac" value="' + esc(def) + '"></label>' +
+    '<div class="row"><button class="btn" onclick="quote(this)">查現價</button></div><div class="muted" id="an"></div>' +
+    '<label>股數<input class="f" id="aq" type="number" inputmode="numeric"></label>' +
+    '<label>成交價<span class="help">美股填美元</span><input class="f" id="ap" type="number" step="0.01" inputmode="decimal"></label>' +
+    '<div class="chk"><input id="acash" type="checkbox" checked>這是新買的（從現金扣除）</div>' +
+    '<div class="help">取消勾選＝原本就有的持股，只登記不扣現金。</div>' +
+    '<div class="row"><button class="btn" onclick="closeModal()">取消</button><button class="btn p" onclick="submitAdd(this)">確認</button></div>');
+}
+function quote(btn){
+  var c = $('ac').value.trim(); if (!c) return; btn.disabled = true;
+  call('apiQuote', [c], function(r){ btn.disabled = false; $('ac').value = r.code; $('ap').value = r.price; $('an').textContent = (r.name || '') + ' 現價 ' + r.price + (r.us ? ' 美元' : ' 元'); }, function(){ btn.disabled = false; });
+}
+function submitAdd(btn){
+  var c = $('ac').value.trim(), q = Number($('aq').value), p = Number($('ap').value);
+  if (!c || !(q > 0) || !(p > 0)) { toast('請填代號、股數、價格'); return; }
+  btn.disabled = true;
+  call('apiTrade', ['buy', c, q, p, $('acash').checked], function(r){ closeModal(); toast(r.msg); load(); }, function(){ btn.disabled = false; });
+}
+function openEdit(code){
+  var x = findItem(code);
+  openModal('<h3>修改 ' + esc(code) + '</h3><div class="help">直接改成正確數字（例如 ETF 分割後），不動現金。</div>' +
+    '<label>股數<input class="f" id="es" type="number" value="' + x.shares + '"></label>' +
+    '<label>平均成本<input class="f" id="ec" type="number" step="0.01" value="' + (x.cost || 0) + '"></label>' +
+    '<div class="row"><button class="btn" onclick="closeModal()">取消</button><button class="btn p" onclick="submitEdit(\'' + code + '\',this)">儲存</button></div>');
+}
+function submitEdit(code, btn){ btn.disabled = true; call('apiSetHolding', [code, Number($('es').value), Number($('ec').value)], function(r){ closeModal(); toast(r.msg); load(); }, function(){ btn.disabled = false; }); }
+function delHold(code){ if (!confirm('確定刪除 ' + code + '？（不會動到現金）')) return; call('apiDelete', [code], function(r){ closeModal(); toast(r.msg); load(); }); }
+function openCash(){
+  openModal('<h3>💵 修改現金</h3><div class="help">存錢、提領、收到股利時改成正確金額。</div>' +
+    '<label>現金（元）<input class="f" id="cv" type="number" inputmode="numeric" value="' + (D.holdings.cash || 0) + '"></label>' +
+    '<div class="row"><button class="btn" onclick="closeModal()">取消</button><button class="btn p" onclick="submitCash(this)">儲存</button></div>');
+}
+function submitCash(btn){ btn.disabled = true; call('apiSetCash', [Number($('cv').value)], function(r){ closeModal(); toast(r.msg); load(); }, function(){ btn.disabled = false; }); }
+
+/* ===== 報告與設定 ===== */
+function renderReport(){
+  $('pg-report').innerHTML = '<div class="panel" style="margin-top:12px"><pre>' + esc(D.text) + '</pre></div>' +
+    '<div class="row"><button class="btn p" onclick="pushLine(this)">📤 推播到 LINE</button><button class="btn" onclick="load()">重新產生</button></div>' +
+    '<div class="hint" style="margin:10px 2px">報告產生時間：' + esc(D.lastRun) + '（報告不會每分鐘更新，按「重新產生」才會）</div>';
+}
+function pushLine(btn){ btn.disabled = true; call('apiPush', [], function(r){ btn.disabled = false; toast(r.msg); }, function(){ btn.disabled = false; }); }
+function renderSet(){
+  var s = D.settings;
+  $('pg-set').innerHTML = '<div class="panel" style="margin-top:12px">' +
+    '<label>一年生活費（元）<span class="help">⭐ 唯一必填：系統會保留 ' + (D.firewallYears || 4) + ' 年份現金當防火牆，買正二絕不動用</span><input class="f" id="s_annualExpense" type="number" value="' + s.annualExpense + '"></label>' +
+    '<label>目標 Beta<span class="help">也可以在「再平衡」頁拖曳設定。1.2＝60% 正二＋40% 現金</span><input class="f" id="s_targetBeta" type="number" step="0.05" value="' + s.targetBeta + '"></label>' +
+    '<label>觸發範圍 ±%<span class="help">10＝目標 1.2 時，1.08～1.32 之間不動</span><input class="f" id="s_band" type="number" value="' + s.band + '"></label>' +
+    '<label>手續費折數 %<span class="help">6 折填 60</span><input class="f" id="s_feeDiscount" type="number" value="' + s.feeDiscount + '"></label>' +
+    '<label>最小交易股數<span class="help">可買零股填 1；只買整張填 1000</span><input class="f" id="s_lot" type="number" value="' + s.lot + '"></label>' +
+    '<div class="chk"><input id="s_pushPremarket" type="checkbox"' + (s.pushPremarket ? ' checked' : '') + '>早上約 8 點推播「盤前展望」（美股＋消息面）</div>' +
+    '<div class="chk"><input id="s_pushIntraday" type="checkbox"' + (s.pushIntraday ? ' checked' : '') + '>盤中約 11 點推播到 LINE</div>' +
+    '<div class="chk"><input id="s_pushClose" type="checkbox"' + (s.pushClose ? ' checked' : '') + '>盤後約 16 點推播到 LINE</div>' +
+    '<div class="chk"><input id="s_pushOnlyAction" type="checkbox"' + (s.pushOnlyAction ? ' checked' : '') + '>只有要買賣時才推播</div>' +
+    '<div class="row" style="margin-top:16px"><button class="btn p" onclick="saveSet(this)">💾 儲存</button></div></div>' +
+    '<div class="hint" style="margin:12px 2px">📱 加到手機桌面：iPhone 用 Safari 打開 → 分享 → 加入主畫面。</div>';
+}
+function saveSet(btn){
+  var o = {};
+  ['annualExpense','targetBeta','band','feeDiscount','lot'].forEach(function(k){ o[k] = $('s_' + k).value; });
+  ['pushPremarket','pushIntraday','pushClose','pushOnlyAction'].forEach(function(k){ o[k] = $('s_' + k).checked; });
+  btn.disabled = true;
+  call('apiSaveSettings', [o], function(r){ btn.disabled = false; toast(r.msg); load(); }, function(){ btn.disabled = false; });
+}
+if (PIN) { go('main'); load(); } else showLogin();
+</script>
+</body>
+</html>
